@@ -1,9 +1,13 @@
 import tkinter as tk
 import random
+import time
 from tkinter import messagebox
+import json
 
 
 class Minesweeper:
+    LEADERBOARD_FILE = "leaderboard.json"
+
     def __init__(self, master, rows=7, cols=7, mines=9):
         self.master = master
         self.rows = rows
@@ -14,6 +18,29 @@ class Minesweeper:
         self.buttons = [[None for _ in range(cols)] for _ in range(rows)]
         self.init_board()
         self.first_click = True
+        self.start_time = None
+        self.leaderboards = self.load_leaderboard()
+
+    @staticmethod
+    def load_leaderboard():
+        try:
+            with open(Minesweeper.LEADERBOARD_FILE, 'r') as file:
+                return json.load(file)
+        except FileNotFoundError:
+            return {}
+
+    @staticmethod
+    def save_leaderboard(leaderboards):
+        with open(Minesweeper.LEADERBOARD_FILE, 'w') as file:
+            json.dump(leaderboards, file)
+
+    def update_leaderboard(self, new_time):
+        difficulty = f"{self.rows}x{self.cols}-{self.mines}"
+        if difficulty not in self.leaderboards:
+            self.leaderboards[difficulty] = []
+        self.leaderboards[difficulty].append(new_time)
+        self.leaderboards[difficulty] = sorted(self.leaderboards[difficulty])[:5]
+        self.save_leaderboard(self.leaderboards)
 
     def init_board(self):
         for row in range(self.rows):
@@ -48,6 +75,7 @@ class Minesweeper:
     def reveal_tile(self, row, col):
         if self.first_click:
             self.first_click = False
+            self.start_time = time.time()
             self.place_mines(row, col)
         if (row, col) in self.mines_location:
             self.buttons[row][col].config(text='*', bg='red')
@@ -99,6 +127,8 @@ class Minesweeper:
         # Die Anzahl der Nicht-Minen-Felder ist Gesamtzahl der Felder minus die Anzahl der Minen
         total_non_mines = self.rows * self.cols - self.mines
         if revealed_count == total_non_mines:
+            elapsed_time = time.time() - self.start_time
+            self.update_leaderboard(elapsed_time)
             # Alle Nicht-Minen-Felder wurden aufgedeckt
             messagebox.showinfo("Glückwunsch!", "Sie haben das Spiel gewonnen!")
             return True
@@ -113,7 +143,7 @@ class Minesweeper:
                     count += 1
         return count
 
-    def reveal_all(self):           #muss noch omptimiert werden
+    def reveal_all(self):  #muss noch omptimiert werden
         for r in range(self.rows):
             for c in range(self.cols):
                 if (r, c) in self.mines_location:
