@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import simpledialog, messagebox
 from minesweeper import Minesweeper
+import threading
 import json
 
 

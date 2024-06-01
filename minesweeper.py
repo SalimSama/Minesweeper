@@ -3,6 +3,8 @@ import random
 import time
 from tkinter import messagebox
 import json
+from Timer import Timer
+import threading
 
 
 class Minesweeper:
@@ -10,16 +12,21 @@ class Minesweeper:
 
     def __init__(self, master, rows=7, cols=7, mines=9):
         self.master = master
+        # Erstellen eines Frames für den Timer
+        self.timer_frame = tk.Frame(self.master)
+        self.timer_frame.grid(row=0, column=0, columnspan=cols, sticky="ew")  # Sticky "ew" dehnt den Frame horizontal
+        self.timer = Timer(self.timer_frame)  # Timer im Frame initialisieren
+
         self.rows = rows
         self.cols = cols
         self.mines = mines
         self.board = []
         self.mines_location = []
         self.buttons = [[None for _ in range(cols)] for _ in range(rows)]
-        self.init_board()
         self.first_click = True
         self.start_time = None
         self.leaderboards = self.load_leaderboard()
+        self.init_board()
 
     @staticmethod
     def load_leaderboard():
@@ -47,7 +54,7 @@ class Minesweeper:
             for col in range(self.cols):
                 button = tk.Button(self.master, text=' ', width=3, command=lambda r=row, c=col: self.reveal_tile(r, c))
                 button.bind("<Button-3>", lambda e, r=row, c=col: self.mark_mine(r, c))
-                button.grid(row=row, column=col)
+                button.grid(row=row + 1, column=col)  # Achtung: Startet bei row+1, um Platz für den Timer zu machen
                 self.buttons[row][col] = button
 
     def place_mines(self, start_row, start_col):
@@ -75,7 +82,7 @@ class Minesweeper:
     def reveal_tile(self, row, col):
         if self.first_click:
             self.first_click = False
-            self.start_time = time.time()
+            threading.Thread(target=self.timer.start).start()  # Timer starten in einem Thread
             self.place_mines(row, col)
         if (row, col) in self.mines_location:
             self.buttons[row][col].config(text='*', bg='red')
@@ -83,19 +90,16 @@ class Minesweeper:
                 for c in range(self.cols):
                     self.reveal_all()
                     self.buttons[r][c]['state'] = 'disabled'
+                    self.timer.stop()  # Timer stoppen, wenn das Spiel verloren ist
             messagebox.showinfo("Game Over", "You hit a mine!")
             self.master.destroy()
         else:
-            #num_mines = sum(
-            #(nr, nc) in self.mines_location
-            #for nr in range(row - 1, row + 2)
-            #for nc in range(col - 1, col + 2)
-            #if 0 <= nr < self.rows and 0 <= nc < self.cols)
             num_mines = self.get_mine_count(row, col)
             self.buttons[row][col].config(text=str(num_mines), bg='white')
             if num_mines == 0:
                 self.reveal_neighbors(row, col)
         if self.check_win():
+            self.timer.stop()  # Timer stoppen, wenn das Spiel gewonnen ist
             for r in range(self.rows):
                 for c in range(self.cols):
                     self.buttons[r][c]['state'] = 'disabled'  # Deaktiviere alle Buttons nach dem Gewinn
