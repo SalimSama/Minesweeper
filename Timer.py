@@ -7,7 +7,7 @@ class Timer:
     def __init__(self, master):
         self.master = master
         self.label = tk.Label(self.master, text="00:00:00:0", font='ariel 15')
-        self.label.pack()
+        self.label.grid(row=0, column=0, sticky="ew")
         self.start_time = None
         self.is_running = False
         self.keep_running = True  # Steuerungsflag
@@ -27,7 +27,6 @@ class Timer:
             self.master.after(50, self.timer)
 
     def stop(self):
-        print("Timer stopping")
         self.keep_running = False  # Setzt das Flag, um den Loop zu beenden
         self.is_running = False
 

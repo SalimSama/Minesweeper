@@ -16,6 +16,12 @@ class Minesweeper:
         self.timer_frame = tk.Frame(self.master)
         self.timer_frame.grid(row=0, column=0, columnspan=cols, sticky="ew")  # Sticky "ew" dehnt den Frame horizontal
         self.timer = Timer(self.timer_frame)  # Timer im Frame initialisieren
+        self.mines_marked = 0
+        self.marked_label = tk.Label(self.timer_frame, text="Markierte Minen: 0")
+        self.marked_label.grid(row=0, column=cols)  # Anpassen, um korrekt neben dem Timer zu erscheinen
+        # Neustart-Button rechts vom Timer
+        self.restart_button = tk.Button(self.timer_frame, text="Neustart", command=self.restart_game)
+        self.restart_button.grid(row=0, column=1)
 
         self.rows = rows
         self.cols = cols
@@ -27,6 +33,7 @@ class Minesweeper:
         self.start_time = None
         self.leaderboards = self.load_leaderboard()
         self.init_board()
+
 
     @staticmethod
     def load_leaderboard():
@@ -87,9 +94,9 @@ class Minesweeper:
             self.place_mines(row, col)
         if (row, col) in self.mines_location:
             self.buttons[row][col].config(text='*', bg='red')
+            self.reveal_all()
             for r in range(self.rows):
                 for c in range(self.cols):
-                    self.reveal_all()
                     self.buttons[r][c]['state'] = 'disabled'
             self.timer.stop()  # Timer stoppen, wenn das Spiel verloren ist
             messagebox.showinfo("Game Over", "You hit a mine!")
@@ -110,10 +117,14 @@ class Minesweeper:
         current_text = self.buttons[row][col]['text']
         if current_text == ' ':
             self.buttons[row][col].config(text='M', bg='orange')
+            self.mines_marked += 1
         elif current_text == 'M':
             self.buttons[row][col].config(text='?', bg='yellow')
+            self.mines_marked -= 1
         else:
             self.buttons[row][col].config(text=' ', bg='SystemButtonFace')
+
+        self.marked_label.config(text=f"Markierte Minen: {self.mines_marked}")
 
     def reveal_neighbors(self, row, col):
         for nr in range(row - 1, row + 2):
@@ -148,14 +159,28 @@ class Minesweeper:
                     count += 1
         return count
 
-    def reveal_all(self):  #muss noch optimiert werden
+    def reveal_all(self):
+        updates = []
         for r in range(self.rows):
             for c in range(self.cols):
                 if (r, c) in self.mines_location:
-                    self.buttons[r][c].config(text='*', bg='red')
+                    updates.append((r, c, '*', 'red'))
                 else:
-
                     num_mines = self.get_mine_count(r, c)
-                    self.buttons[r][c].config(text=str(num_mines), bg='white')
+                    updates.append((r, c, str(num_mines), 'white'))
                     if num_mines == 0:
                         self.reveal_neighbors(r, c)
+
+        for r, c, text, bg in updates:
+            self.buttons[r][c].config(text=text, bg=bg)
+
+    def restart_game(self):
+        for row in range(self.rows):
+            for col in range(self.cols):
+                self.buttons[row][col].config(text=' ', bg='SystemButtonFace', state='normal')
+        self.mines_location.clear()
+        self.board.clear()
+        self.first_click = True
+        self.mines_marked = 0
+        self.marked_label.config(text="Markierte Minen: 0")
+        self.timer.stop()

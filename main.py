@@ -1,8 +1,6 @@
 import tkinter as tk
 from tkinter import simpledialog, messagebox
 from minesweeper import Minesweeper
-import threading
-import json
 
 
 def start_game(rows, cols, mines, geometry):
@@ -88,5 +86,4 @@ if __name__ == "__main__":
         fill=tk.X)
     tk.Button(menu_window, text="Benutzerdefiniert", command=custom_game).pack(fill=tk.X)
     tk.Button(menu_window, text="Ranglisten anzeigen", command=show_leaderboard).pack(fill=tk.X)
-
     menu_window.mainloop()
