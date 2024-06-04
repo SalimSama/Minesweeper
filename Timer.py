@@ -2,6 +2,7 @@ import tkinter as tk
 import time
 import threading
 
+
 class Timer:
     def __init__(self, master):
         self.master = master
@@ -26,6 +27,7 @@ class Timer:
             self.master.after(50, self.timer)
 
     def stop(self):
+        print("Timer stopping")
         self.keep_running = False  # Setzt das Flag, um den Loop zu beenden
         self.is_running = False
 
@@ -34,5 +36,5 @@ class Timer:
         hours = int(elap / 3600)
         minutes = int(elap / 60 - hours * 60.0)
         seconds = int(elap - hours * 3600.0 - minutes * 60.0)
-        hseconds = int((elap - hours * 3600.0 - minutes * 60.0 - seconds) * 100)
-        return '%02d:%02d:%02d.%02d' % (hours, minutes, seconds, hseconds)
+        mSeconds = int((elap - hours * 3600.0 - minutes * 60.0 - seconds) * 100)
+        return '%02d:%02d:%02d.%02d' % (hours, minutes, seconds, mSeconds)

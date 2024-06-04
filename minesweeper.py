@@ -82,6 +82,7 @@ class Minesweeper:
     def reveal_tile(self, row, col):
         if self.first_click:
             self.first_click = False
+            self.start_time = time.time()
             threading.Thread(target=self.timer.start).start()  # Timer starten in einem Thread
             self.place_mines(row, col)
         if (row, col) in self.mines_location:
@@ -90,7 +91,7 @@ class Minesweeper:
                 for c in range(self.cols):
                     self.reveal_all()
                     self.buttons[r][c]['state'] = 'disabled'
-                    self.timer.stop()  # Timer stoppen, wenn das Spiel verloren ist
+            self.timer.stop()  # Timer stoppen, wenn das Spiel verloren ist
             messagebox.showinfo("Game Over", "You hit a mine!")
             self.master.destroy()
         else:
@@ -100,6 +101,7 @@ class Minesweeper:
                 self.reveal_neighbors(row, col)
         if self.check_win():
             self.timer.stop()  # Timer stoppen, wenn das Spiel gewonnen ist
+            messagebox.showinfo("Glückwunsch!", "Sie haben das Spiel gewonnen!")
             for r in range(self.rows):
                 for c in range(self.cols):
                     self.buttons[r][c]['state'] = 'disabled'  # Deaktiviere alle Buttons nach dem Gewinn
@@ -134,7 +136,6 @@ class Minesweeper:
             elapsed_time = time.time() - self.start_time
             self.update_leaderboard(elapsed_time)
             # Alle Nicht-Minen-Felder wurden aufgedeckt
-            messagebox.showinfo("Glückwunsch!", "Sie haben das Spiel gewonnen!")
             return True
         return False
 
@@ -147,7 +148,7 @@ class Minesweeper:
                     count += 1
         return count
 
-    def reveal_all(self):  #muss noch omptimiert werden
+    def reveal_all(self):  #muss noch optimiert werden
         for r in range(self.rows):
             for c in range(self.cols):
                 if (r, c) in self.mines_location:
