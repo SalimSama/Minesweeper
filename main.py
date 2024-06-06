@@ -3,6 +3,20 @@ from tkinter import simpledialog, messagebox
 from minesweeper import Minesweeper
 
 
+def create_label(window, text, font=None, pack_opts=None):
+    label = tk.Label(window, text=text, font=font)
+    if pack_opts:
+        label.pack(**pack_opts)
+    return label
+
+
+def create_button(window, text, command, pack_opts=None):
+    button = tk.Button(window, text=text, command=command)
+    if pack_opts:
+        button.pack(**pack_opts)
+    return button
+
+
 def start_game(rows, cols, mines, geometry):
     game_window = tk.Tk()
     game_window.title("Minesweeper")
@@ -21,8 +35,9 @@ def show_leaderboard():
     center_window(leaderboard_window, 250, 300)
     leaderboards = Minesweeper.load_leaderboard()
     for difficulty, times in leaderboards.items():
-        tk.Label(leaderboard_window,
-                 text=f"{difficulty} Bestzeiten: {', '.join([f'{time:.2f}' for time in times])}").pack()
+        create_label(leaderboard_window,
+                     text=f"{difficulty} Bestzeiten: {', '.join([f'{time:.2f}' for time in times])}",
+                     pack_opts={'side': 'top'})
 
 
 def custom_game():
@@ -30,15 +45,15 @@ def custom_game():
     custom_window.title("Benutzerdefinierte Einstellungen")
     center_window(custom_window, 150, 200)
 
-    tk.Label(custom_window, text="Reihen (max 30):").pack()
+    create_label(custom_window, "Reihen (max 30):").pack()
     rows_entry = tk.Entry(custom_window)
     rows_entry.pack()
 
-    tk.Label(custom_window, text="Spalten (max 30):").pack()
+    create_label(custom_window, "Spalten (max 30):").pack()
     cols_entry = tk.Entry(custom_window)
     cols_entry.pack()
 
-    tk.Label(custom_window, text="Minen (max 800):").pack()
+    create_label(custom_window, "Minen (max 800):").pack()
     mines_entry = tk.Entry(custom_window)
     mines_entry.pack()
 
@@ -49,18 +64,17 @@ def custom_game():
             mines = min(800, int(mines_entry.get()))
             geo_row = int(rows * 31.25)
             geo_col = int(cols * 30)
-            geometry = str(geo_row) + "x" + str(geo_col)
+            geometry = f"{geo_row}x{geo_col}"
 
         except ValueError:
             messagebox.showerror("Eingabefehler", "Bitte geben Sie gültige Zahlen ein.")
             return
 
         start_game(rows, cols, mines, geometry)
-        custom_window.destroy()  # Zuerst das benutzerdefinierte Fenster schließen
-        menu_window.destroy()  # Dann das Hauptmenüfenster schließen
+        custom_window.destroy()
+        menu_window.destroy()
 
-    submit_button = tk.Button(custom_window, text="Spiel starten", command=submit_custom)
-    submit_button.pack()
+    create_button(custom_window, "Spiel starten", submit_custom).pack()
 
 
 def center_window(root, width, height):
@@ -76,14 +90,10 @@ if __name__ == "__main__":
     menu_window.title("Minesweeper Menü")
     center_window(menu_window, 250, 250)
 
-    tk.Label(menu_window, text="Minesweeper", font=("Helvetica", 24, "bold")).pack(pady=20)
-
-    tk.Button(menu_window, text="Leicht (8x8, 10 Minen)", command=lambda: start_game(8, 8, 10, '249x210')).pack(
-        fill=tk.X)
-    tk.Button(menu_window, text="Mittel (16x16, 40 Minen)", command=lambda: start_game(16, 16, 40, '495x420')).pack(
-        fill=tk.X)
-    tk.Button(menu_window, text="Schwer (30x16, 99 Minen)", command=lambda: start_game(30, 16, 99, '500x780')).pack(
-        fill=tk.X)
-    tk.Button(menu_window, text="Benutzerdefiniert", command=custom_game).pack(fill=tk.X)
-    tk.Button(menu_window, text="Ranglisten anzeigen", command=show_leaderboard).pack(fill=tk.X)
+    create_label(menu_window, "Minesweeper", font=("Helvetica", 24, "bold"), pack_opts={'pady': 20})
+    create_button(menu_window, "Leicht (8x8, 10 Minen)", lambda: start_game(8, 8, 10, '249x210')).pack(fill=tk.X)
+    create_button(menu_window, "Mittel (16x16, 40 Minen)", lambda: start_game(16, 16, 40, '495x420')).pack(fill=tk.X)
+    create_button(menu_window, "Schwer (30x16, 99 Minen)", lambda: start_game(30, 16, 99, '500x780')).pack(fill=tk.X)
+    create_button(menu_window, "Benutzerdefiniert", custom_game).pack(fill=tk.X)
+    create_button(menu_window, "Ranglisten anzeigen", show_leaderboard).pack(fill=tk.X)
     menu_window.mainloop()
