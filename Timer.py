@@ -30,6 +30,10 @@ class Timer:
         self.is_running = False
         self.keep_running = False
 
+    def reset(self):
+        self.start_time = None
+        self.label.config(text="00:00:00.00")
+
     @staticmethod
     def format_time(elap):
         hours = int(elap / 3600)

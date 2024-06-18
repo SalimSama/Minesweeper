@@ -101,6 +101,7 @@ class Minesweeper:
             self.timer.stop()  # Timer stoppen, wenn das Spiel verloren ist
             messagebox.showinfo("Game Over", "You hit a mine!")
             self.master.destroy()
+            return
         else:
             num_mines = self.get_mine_count(row, col)
             self.buttons[row][col].config(text=str(num_mines), bg='white')
@@ -184,3 +185,4 @@ class Minesweeper:
         self.mines_marked = 0
         self.marked_label.config(text="Markierte Minen: 0")
         self.timer.stop()
+        self.timer.reset()
