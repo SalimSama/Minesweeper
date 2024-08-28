@@ -17,10 +17,12 @@ class Minesweeper:
         self.timer_frame.grid(row=0, column=0, columnspan=cols, sticky="ew")  # Platzierung des Timer-Frames
         self.timer = Timer(self.timer_frame)  # Initialisierung des Timers im Frame
         self.mines_marked = 0  # Zähler für markierte Minen
-        self.marked_label = tk.Label(self.timer_frame, text="Markierte Minen: 0")  # Label für die Anzeige der markierten Minen
+        self.marked_label = tk.Label(self.timer_frame, text="Markierte Minen: 0", font=("Helvetica", 11))  # Label für die Anzeige der markierten Minen
         self.marked_label.grid(row=0, column=cols)  # Platzierung des Labels neben dem Timer
-        self.restart_button = tk.Button(self.timer_frame, text="Neustart", command=self.restart_game)  # Neustart-Button
+        self.restart_button = tk.Button(self.timer_frame, text="Neustart", font=("Helvetica", 11), command=self.restart_game)  # Neustart-Button
         self.restart_button.grid(row=0, column=1)
+        self.suggestion_button = tk.Button(self.timer_frame, text="Vorschlag", font=("Helvetica", 11), command=self.suggest_move)
+        self.suggestion_button.grid(row=0, column=2)  # Platziere den Button neben dem Neustart-Button
 
         self.rows = rows
         self.cols = cols
@@ -59,7 +61,7 @@ class Minesweeper:
         # Initialisierung des Spielfeldes durch Erstellen von Buttons für jedes Feld
         for row in range(self.rows):
             for col in range(self.cols):
-                button = tk.Button(self.master, text=' ', width=3, command=lambda r=row, c=col: self.reveal_tile(r, c))
+                button = tk.Button(self.master, text=' ', font=("Helvetica", 9, "bold"), width=3, command=lambda r=row, c=col: self.reveal_tile(r, c))
                 button.bind("<Button-3>", lambda e, r=row, c=col: self.mark_mine(r, c))  # Rechtsklick zum Markieren einer Mine
                 button.grid(row=row + 1, column=col)  # Positionierung der Buttons (Zeilenversatz für den Timer)
                 self.buttons[row][col] = button  # Speichern der Buttons in der Matrix
@@ -187,6 +189,60 @@ class Minesweeper:
 
         for r, c, text, bg in updates:
             self.buttons[r][c].config(text=text, bg=bg)  # Aktualisierung der Anzeige der Buttons
+
+    def get_neighbors(self, r, c):
+        neighbors = []
+        for i in range(max(0, r - 1), min(self.rows, r + 2)):
+            for j in range(max(0, c - 1), min(self.cols, c + 2)):
+                if (i, j) != (r, c):
+                    neighbors.append((i, j))
+        return neighbors
+
+    def find_safe_move(self):
+        known_mines = set()
+        safe_moves = set()
+
+        for r in range(self.rows):
+            for c in range(self.cols):
+                button_text = self.buttons[r][c].cget('text')
+                if button_text.isdigit():
+                    num_mines = int(button_text)
+                    neighbors = self.get_neighbors(r, c)
+                    hidden_neighbors = [(i, j) for i, j in neighbors if self.buttons[i][j].cget('text') == ' ']
+                    marked_neighbors = [(i, j) for i, j in neighbors if self.buttons[i][j].cget('text') == 'M']
+
+                    if len(marked_neighbors) == num_mines:
+                        for n in hidden_neighbors:
+                            if n not in known_mines:
+                                safe_moves.add(n)
+
+                    if len(hidden_neighbors) == num_mines - len(marked_neighbors):
+                        for n in hidden_neighbors:
+                            known_mines.add(n)
+                            self.mark_mine(n[0], n[1])
+
+        if safe_moves:
+            return safe_moves.pop()
+        else:
+            return None
+
+    def suggest_move(self):
+        move = self.find_safe_move()
+        if move:
+            row, col = move
+            self.reveal_tile(row, col)
+        else:
+            response = messagebox.askyesno("Ratezug", "Kein sicherer Zug gefunden. Soll ich raten?")
+            if response:
+                self.random_guess()
+
+    def random_guess(self):
+        hidden_tiles = [(r, c) for r in range(self.rows) for c in range(self.cols) if
+                        self.buttons[r][c].cget('text') == ' ']
+        if hidden_tiles:
+            row, col = random.choice(hidden_tiles)
+            self.reveal_tile(row, col)
+
 
     def restart_game(self):
         # Neustart des Spiels: Zurücksetzen aller Felder und Timer

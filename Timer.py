@@ -7,7 +7,7 @@ class Timer:
     def __init__(self, master):
         self.master = master
         # Label zur Anzeige der verstrichenen Zeit im Format Stunden:Minuten:Sekunden.Hundertstelsekunden
-        self.label = tk.Label(self.master, text="00:00:00.00", font='ariel 15')
+        self.label = tk.Label(self.master, text="00:00:00.00", font='Helvetica 15')
         self.label.grid(row=0, column=0, sticky="ew")  # Platzierung des Labels
         self.start_time = None  # Variable zur Speicherung der Startzeit
         self.is_running = False  # Flag, das anzeigt, ob der Timer läuft
