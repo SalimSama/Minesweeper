@@ -50,7 +50,8 @@ def show_leaderboard():
     for difficulty, times in leaderboards.items():
         # Zeigt die Bestenzeiten für jede Schwierigkeitsstufe an
         create_label(leaderboard_window,
-                     text=f"{difficulty} Bestzeiten: {', '.join([f'{time:.2f}' for time in times])}",
+                     text=f"{difficulty} --> Bestzeiten: {', '.join([f'{time:.2f}s' for time in times])}",
+                     font=("Helvetica", 16, "bold"),
                      pack_opts={'side': 'top'})
 
 # Erstellt ein Fenster für benutzerdefinierte Spieleinstellungen
@@ -61,15 +62,15 @@ def custom_game():
     custom_window.configure(bg="#1c1c1c")
 
     # Eingabefelder für Reihen, Spalten und Minen
-    create_label(custom_window, "Reihen (max 30):").pack()
+    create_label(custom_window, "Reihen (max 30):", font=("Helvetica", 11)).pack()
     rows_entry = tk.Entry(custom_window)
     rows_entry.pack()
 
-    create_label(custom_window, "Spalten (max 30):").pack()
+    create_label(custom_window, "Spalten (max 30):", font=("Helvetica", 11)).pack()
     cols_entry = tk.Entry(custom_window)
     cols_entry.pack()
 
-    create_label(custom_window, "Minen (max 800):").pack()
+    create_label(custom_window, "Minen (max 800):", font=("Helvetica", 11)).pack()
     mines_entry = tk.Entry(custom_window)
     mines_entry.pack()
 

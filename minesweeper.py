@@ -50,7 +50,7 @@ class Minesweeper:
 
     def update_leaderboard(self, new_time):
         # Aktualisierung der Rangliste mit der neuen Spielzeit
-        difficulty = f"{self.rows}x{self.cols}-{self.mines}"
+        difficulty = f"Spiel: {self.rows}x{self.cols} mit {self.mines} Minen"
         if difficulty not in self.leaderboards:
             self.leaderboards[difficulty] = []
         self.leaderboards[difficulty].append(new_time)
@@ -61,9 +61,9 @@ class Minesweeper:
         # Initialisierung des Spielfeldes durch Erstellen von Buttons für jedes Feld
         for row in range(self.rows):
             for col in range(self.cols):
-                button = tk.Button(self.master, text=' ', font=("Helvetica", 9, "bold"), width=3, command=lambda r=row, c=col: self.reveal_tile(r, c))
+                button = tk.Button(self.master, text=' ', font=("Helvetica", 9, "bold"), command=lambda r=row, c=col: self.reveal_tile(r, c))
                 button.bind("<Button-3>", lambda e, r=row, c=col: self.mark_mine(r, c))  # Rechtsklick zum Markieren einer Mine
-                button.grid(row=row + 1, column=col)  # Positionierung der Buttons (Zeilenversatz für den Timer)
+                button.grid(row=row + 1, column=col, sticky="nsew")  # Positionierung der Buttons (Zeilenversatz für den Timer)
                 self.buttons[row][col] = button  # Speichern der Buttons in der Matrix
 
     def place_mines(self, start_row, start_col):
@@ -110,7 +110,7 @@ class Minesweeper:
                 for c in range(self.cols):
                     self.buttons[r][c]['state'] = 'disabled'  # Deaktivieren aller Buttons nach Spielende
             self.timer.stop()  # Timer stoppen
-            messagebox.showinfo("Game Over", "You hit a mine!")  # Anzeige einer Spielende-Nachricht
+            messagebox.showinfo("Game Over", "Sie haben eine Mine erwischt!")  # Anzeige einer Spielende-Nachricht
             self.master.destroy()  # Schließen des Fensters
             return
         else:
