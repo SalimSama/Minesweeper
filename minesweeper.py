@@ -60,7 +60,9 @@ class Minesweeper:
     def init_board(self):
         # Initialisierung des Spielfeldes durch Erstellen von Buttons für jedes Feld
         for row in range(self.rows):
+            self.master.grid_rowconfigure(row + 1, minsize=30, weight=1)
             for col in range(self.cols):
+                self.master.grid_columnconfigure(col, minsize=30, weight=1)
                 button = tk.Button(self.master, text=' ', font=("Helvetica", 9, "bold"), command=lambda r=row, c=col: self.reveal_tile(r, c))
                 button.bind("<Button-3>", lambda e, r=row, c=col: self.mark_mine(r, c))  # Rechtsklick zum Markieren einer Mine
                 button.grid(row=row + 1, column=col, sticky="nsew")  # Positionierung der Buttons (Zeilenversatz für den Timer)
@@ -116,7 +118,9 @@ class Minesweeper:
         else:
             # Falls das aufgedeckte Feld keine Mine enthält, die entsprechende Zahl anzeigen
             num_mines = self.get_mine_count(row, col)
+            self.buttons[row][col]['state'] = 'disabled'
             self.buttons[row][col].config(text=str(num_mines), bg='white')
+
             if num_mines == 0:
                 self.reveal_neighbors(row, col)  # Automatisches Aufdecken der angrenzenden Felder, falls keine Minen angrenzen
         if self.check_win():
@@ -129,15 +133,16 @@ class Minesweeper:
 
     def mark_mine(self, row, col):
         # Markieren eines Feldes als Mine oder als unsicher (Fragezeichen)
-        current_text = self.buttons[row][col]['text']
-        if current_text == ' ':
-            self.buttons[row][col].config(text='M', bg='orange')
-            self.mines_marked += 1
-        elif current_text == 'M':
-            self.buttons[row][col].config(text='?', bg='yellow')
-            self.mines_marked -= 1
-        else:
-            self.buttons[row][col].config(text=' ', bg='SystemButtonFace')
+        if self.buttons[row][col]['state'] != 'disabled':
+            current_text = self.buttons[row][col]['text']
+            if current_text == ' ':
+                self.buttons[row][col].config(text='M', bg='orange')
+                self.mines_marked += 1
+            elif current_text == 'M':
+                self.buttons[row][col].config(text='?', bg='yellow')
+                self.mines_marked -= 1
+            else:
+                self.buttons[row][col].config(text=' ', bg='SystemButtonFace')
 
         self.marked_label.config(text=f"Markierte Minen: {self.mines_marked}")
 
@@ -191,6 +196,8 @@ class Minesweeper:
             self.buttons[r][c].config(text=text, bg=bg)  # Aktualisierung der Anzeige der Buttons
 
     def get_neighbors(self, r, c):
+        #Name der Methode erklärt sie bereits
+        #um ein Feld werden die 8 Nachbarn zurückgegeben
         neighbors = []
         for i in range(max(0, r - 1), min(self.rows, r + 2)):
             for j in range(max(0, c - 1), min(self.cols, c + 2)):
@@ -199,49 +206,60 @@ class Minesweeper:
         return neighbors
 
     def find_safe_move(self):
-        known_mines = set()
-        safe_moves = set()
+        # Diese Methode sucht nach sicheren Zügen, indem sie Felder analysiert, die
+        # bereits aufgedeckt wurden und ihre Nachbarn bewertet.
+        known_mines = set()  # Set für bekannte Minen, die sicher markiert sind
+        safe_moves = set()  # Set für sichere Züge, die aufgedeckt werden können
 
         for r in range(self.rows):
             for c in range(self.cols):
-                button_text = self.buttons[r][c].cget('text')
-                if button_text.isdigit():
-                    num_mines = int(button_text)
-                    neighbors = self.get_neighbors(r, c)
-                    hidden_neighbors = [(i, j) for i, j in neighbors if self.buttons[i][j].cget('text') == ' ']
-                    marked_neighbors = [(i, j) for i, j in neighbors if self.buttons[i][j].cget('text') == 'M']
+                button_text = self.buttons[r][c].cget('text')  # Text des Buttons abfragen
+                if button_text.isdigit():  # Falls das Feld eine Zahl zeigt
+                    num_mines = int(button_text)  # Anzahl der Minen, die das Feld umgeben
+                    neighbors = self.get_neighbors(r, c)  # Nachbarfelder des aktuellen Felds abfragen
+                    hidden_neighbors = [(i, j) for i, j in neighbors if self.buttons[i][j].cget('text') == ' ']  # Nachbarfelder, die noch nicht aufgedeckt wurden
+                    marked_neighbors = [(i, j) for i, j in neighbors if self.buttons[i][j].cget('text') == 'M']  # Nachbarfelder, die als Minen markiert wurden
 
                     if len(marked_neighbors) == num_mines:
+                        # Wenn alle Minen in den Nachbarfeldern markiert sind, können alle
+                        # anderen Felder als sicher angesehen werden
                         for n in hidden_neighbors:
                             if n not in known_mines:
-                                safe_moves.add(n)
+                                safe_moves.add(n)  # Sichere Züge hinzufügen
 
                     if len(hidden_neighbors) == num_mines - len(marked_neighbors):
+                        # Wenn die Anzahl der versteckten Nachbarfelder der Anzahl der verbleibenden
+                        # unmarkierten Minen entspricht, diese Nachbarn als Minen markieren
                         for n in hidden_neighbors:
-                            known_mines.add(n)
-                            self.mark_mine(n[0], n[1])
+                            known_mines.add(n)  # Feld als Mine markieren
+                            self.mark_mine(n[0], n[1])  # Minen-Flag setzen
 
         if safe_moves:
-            return safe_moves.pop()
+            return safe_moves.pop()  # Sicheres Feld zurückgeben
         else:
-            return None
+            return None  # Kein sicherer Zug gefunden
 
     def suggest_move(self):
-        move = self.find_safe_move()
+        # Diese Methode schlägt einen sicheren Zug vor oder fragt den Spieler, ob er
+        # ein Risiko eingehen und raten möchte.
+        move = self.find_safe_move()  # Sicheren Zug suchen
         if move:
             row, col = move
-            self.reveal_tile(row, col)
+            self.reveal_tile(row, col)  # Sicheres Feld aufdecken
         else:
+            # Wenn kein sicherer Zug gefunden wird, wird der Spieler gefragt, ob er raten möchte
             response = messagebox.askyesno("Ratezug", "Kein sicherer Zug gefunden. Soll ich raten?")
             if response:
-                self.random_guess()
+                self.random_guess()  # Zufälliges Feld aufdecken
 
     def random_guess(self):
+        # Diese Methode wählt zufällig ein verdecktes Feld aus und deckt es auf, wenn kein sicherer Zug verfügbar ist
         hidden_tiles = [(r, c) for r in range(self.rows) for c in range(self.cols) if
-                        self.buttons[r][c].cget('text') == ' ']
+                        self.buttons[r][c].cget('text') == ' ']  # Alle verdeckten Felder sammeln
         if hidden_tiles:
-            row, col = random.choice(hidden_tiles)
-            self.reveal_tile(row, col)
+            row, col = random.choice(hidden_tiles)  # Zufälliges verdecktes Feld wählen
+            self.reveal_tile(row, col)  # Gewähltes Feld aufdecken
+
 
 
     def restart_game(self):

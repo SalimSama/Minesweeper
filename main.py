@@ -28,6 +28,7 @@ def create_button(window, text, command, pack_opts=None):
     button.bind("<Leave>", on_leave)
     return button
 
+
 # Startet das Minesweeper-Spiel mit den angegebenen Einstellungen
 def start_game(rows, cols, mines, geometry):
     game_window = tk.Tk()  # Neues Fenster für das Spiel
@@ -77,16 +78,28 @@ def custom_game():
     # Bestätigungsfunktion für benutzerdefinierte Spieleinstellungen
     def submit_custom():
         try:
-            rows = min(30, int(rows_entry.get()))
-            cols = min(30, int(cols_entry.get()))
-            mines = min(800, int(mines_entry.get()))
+            # Hole die Werte aus den Eingabefeldern und prüfe sie
+            rows = int(rows_entry.get())
+            cols = int(cols_entry.get())
+            mines = int(mines_entry.get())
+
+            # Überprüfen, ob einer der Werte außerhalb des erlaubten Bereichs liegt
+            if rows > 30 or cols > 30 or mines > 800:
+                raise ValueError(
+                    "Die Anzahl der Reihen und Spalten darf 30 nicht überschreiten, und Minen dürfen nicht mehr als 800 betragen.")
+
+            # Begrenze die Werte, falls sie innerhalb der erlaubten Grenzen liegen
+            rows = min(30, rows)
+            cols = min(30, cols)
+            mines = min(800, mines)
+
             geo_row = int(rows * 31.25)  # Berechnet die Fenstergröße basierend auf der Anzahl der Reihen
             geo_col = int(cols * 30)  # Berechnet die Fenstergröße basierend auf der Anzahl der Spalten
             geometry = f"{geo_row}x{geo_col}"
 
-        except ValueError:
-            # Fehlermeldung, wenn ungültige Werte eingegeben wurden
-            messagebox.showerror("Eingabefehler", "Bitte geben Sie gültige Zahlen ein.")
+        except ValueError as e:
+            # Fehlermeldung, wenn ungültige Werte eingegeben wurden oder die Grenze überschritten wurde
+            messagebox.showerror("Eingabefehler", str(e))
             return
 
         start_game(rows, cols, mines, geometry)  # Startet das Spiel mit den benutzerdefinierten Einstellungen
@@ -96,7 +109,9 @@ def custom_game():
         finally:
             return
 
+    # Button erstellen, um das Spiel zu starten
     create_button(custom_window, "Spiel starten", submit_custom).pack()
+
 
 # Zentriert das Fenster auf dem Bildschirm
 def center_window(root, width, height):
@@ -114,7 +129,7 @@ if __name__ == "__main__":
 
     # Erstellung und Platzierung der Menüelemente
     create_label(menu_window, "Minesweeper", font=("Helvetica", 24, "bold"))
-    create_button(menu_window, "Leicht (8x8, 10 Minen)", lambda: start_game(8, 8, 10, '249x210'))
+    create_button(menu_window, "Leicht (8x8, 10 Minen)", lambda: start_game(8, 8, 10, '290x210'))
     create_button(menu_window, "Mittel (16x16, 40 Minen)", lambda: start_game(16, 16, 40, '495x420'))
     create_button(menu_window, "Schwer (30x16, 99 Minen)", lambda: start_game(30, 16, 99, '500x780'))
     create_button(menu_window, "Benutzerdefiniert", custom_game)
