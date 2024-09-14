@@ -1,6 +1,8 @@
+# Startet das Programm und öffnet das Menü, bekommt als Eingabe die gewünschten Spieleinstellungen
 import tkinter as tk
 from tkinter import simpledialog, messagebox
 from minesweeper import Minesweeper
+
 
 # Funktion zur Erstellung eines Labels mit bestimmten Eigenschaften
 def create_label(window, text, font=None, pack_opts=None):
@@ -10,10 +12,12 @@ def create_label(window, text, font=None, pack_opts=None):
         label.pack(**pack_opts)  # Platzierung des Labels im Fenster
     return label
 
+
 # Funktion zur Erstellung eines Buttons mit bestimmten Eigenschaften
 def create_button(window, text, command, pack_opts=None):
-    button = tk.Button(window, text=text, font=("Helvetica", 16, "bold"), command=command, width=19, height=1, bg="#005f99", fg="#ffffff", relief=tk.FLAT, bd=10)
-    button.pack(padx=20, pady=7,anchor='w')
+    button = tk.Button(window, text=text, font=("Helvetica", 16, "bold"), command=command, width=19, height=1,
+                       bg="#005f99", fg="#ffffff", relief=tk.FLAT, bd=10)
+    button.pack(padx=20, pady=7, anchor='w')
     if pack_opts:
         button.pack(**pack_opts)
 
@@ -41,6 +45,7 @@ def start_game(rows, cols, mines, geometry):
     finally:
         game_window.mainloop()  # Startet die Hauptschleife des Spiels
 
+
 # Zeigt die Bestenliste an
 def show_leaderboard():
     leaderboard_window = tk.Toplevel(menu_window)  # Neues Fenster für die Bestenliste
@@ -54,6 +59,7 @@ def show_leaderboard():
                      text=f"{difficulty} --> Bestzeiten: {', '.join([f'{time:.2f}s' for time in times])}",
                      font=("Helvetica", 16, "bold"),
                      pack_opts={'side': 'top'})
+
 
 # Erstellt ein Fenster für benutzerdefinierte Spieleinstellungen
 def custom_game():
@@ -84,9 +90,9 @@ def custom_game():
             mines = int(mines_entry.get())
 
             # Überprüfen, ob einer der Werte außerhalb des erlaubten Bereichs liegt
-            if rows > 30 or cols > 30 or mines > 800:
+            if (rows < 1 or rows > 30) or (cols < 1 or cols > 30) or (mines > 800 or mines < 2):
                 raise ValueError(
-                    "Die Anzahl der Reihen und Spalten darf 30 nicht überschreiten, und Minen dürfen nicht mehr als 800 betragen.")
+                    "Fehler, bitte überprüfen Sie Ihre Eingabe!")
 
             # Begrenze die Werte, falls sie innerhalb der erlaubten Grenzen liegen
             rows = min(30, rows)
@@ -121,6 +127,7 @@ def center_window(root, width, height):
     center_y = int(screen_height / 2 - height / 2)
     root.geometry(f'+{center_x}+{center_y}')  # Setzt die Fensterposition
 
+
 if __name__ == "__main__":
     menu_window = tk.Tk()  # Erstellt das Hauptmenüfenster
     menu_window.title("Minesweeper Menü")
@@ -133,6 +140,6 @@ if __name__ == "__main__":
     create_button(menu_window, "Mittel (16x16, 40 Minen)", lambda: start_game(16, 16, 40, '495x420'))
     create_button(menu_window, "Schwer (30x16, 99 Minen)", lambda: start_game(30, 16, 99, '500x780'))
     create_button(menu_window, "Benutzerdefiniert", custom_game)
-    create_button(menu_window, "Ranglisten anzeigen", show_leaderboard)
+    create_button(menu_window, "Bestenliste", show_leaderboard)
 
     menu_window.mainloop()  # Startet die Hauptschleife des Menüs

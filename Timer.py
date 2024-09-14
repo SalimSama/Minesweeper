@@ -1,6 +1,6 @@
 import tkinter as tk
 import time
-import threading
+
 
 # Timer-Klasse zur Verwaltung der Zeit während des Spiels
 class Timer:

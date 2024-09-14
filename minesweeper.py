@@ -1,3 +1,6 @@
+# Die Hauptklasse des Programms, darin sind alle Methoden zur Verwaltung des Spiels, sowie hinter der Spiel-Logik
+# und die Lösungshilfe
+
 import tkinter as tk
 import random
 import time
@@ -17,11 +20,14 @@ class Minesweeper:
         self.timer_frame.grid(row=0, column=0, columnspan=cols, sticky="ew")  # Platzierung des Timer-Frames
         self.timer = Timer(self.timer_frame)  # Initialisierung des Timers im Frame
         self.mines_marked = 0  # Zähler für markierte Minen
-        self.marked_label = tk.Label(self.timer_frame, text="Markierte Minen: 0", font=("Helvetica", 11))  # Label für die Anzeige der markierten Minen
+        self.marked_label = tk.Label(self.timer_frame, text="Markierte Minen: 0",
+                                     font=("Helvetica", 11))  # Label für die Anzeige der markierten Minen
         self.marked_label.grid(row=0, column=cols)  # Platzierung des Labels neben dem Timer
-        self.restart_button = tk.Button(self.timer_frame, text="Neustart", font=("Helvetica", 11), command=self.restart_game)  # Neustart-Button
+        self.restart_button = tk.Button(self.timer_frame, text="Neustart", font=("Helvetica", 11),
+                                        command=self.restart_game)  # Neustart-Button
         self.restart_button.grid(row=0, column=1)
-        self.suggestion_button = tk.Button(self.timer_frame, text="Vorschlag", font=("Helvetica", 11), command=self.suggest_move)
+        self.suggestion_button = tk.Button(self.timer_frame, text="Hilfe", font=("Helvetica", 11),
+                                           command=self.suggest_move)
         self.suggestion_button.grid(row=0, column=2)  # Platziere den Button neben dem Neustart-Button
 
         self.rows = rows
@@ -63,9 +69,12 @@ class Minesweeper:
             self.master.grid_rowconfigure(row + 1, minsize=30, weight=1)
             for col in range(self.cols):
                 self.master.grid_columnconfigure(col, minsize=30, weight=1)
-                button = tk.Button(self.master, text=' ', font=("Helvetica", 9, "bold"), command=lambda r=row, c=col: self.reveal_tile(r, c))
-                button.bind("<Button-3>", lambda e, r=row, c=col: self.mark_mine(r, c))  # Rechtsklick zum Markieren einer Mine
-                button.grid(row=row + 1, column=col, sticky="nsew")  # Positionierung der Buttons (Zeilenversatz für den Timer)
+                button = tk.Button(self.master, text=' ', font=("Helvetica", 9, "bold"),
+                                   command=lambda r=row, c=col: self.reveal_tile(r, c))
+                button.bind("<Button-3>",
+                            lambda e, r=row, c=col: self.mark_mine(r, c))  # Rechtsklick zum Markieren einer Mine
+                button.grid(row=row + 1, column=col,
+                            sticky="nsew")  # Positionierung der Buttons (Zeilenversatz für den Timer)
                 self.buttons[row][col] = button  # Speichern der Buttons in der Matrix
 
     def place_mines(self, start_row, start_col):
@@ -113,7 +122,6 @@ class Minesweeper:
                     self.buttons[r][c]['state'] = 'disabled'  # Deaktivieren aller Buttons nach Spielende
             self.timer.stop()  # Timer stoppen
             messagebox.showinfo("Game Over", "Sie haben eine Mine erwischt!")  # Anzeige einer Spielende-Nachricht
-            self.master.destroy()  # Schließen des Fensters
             return
         else:
             # Falls das aufgedeckte Feld keine Mine enthält, die entsprechende Zahl anzeigen
@@ -122,7 +130,8 @@ class Minesweeper:
             self.buttons[row][col].config(text=str(num_mines), bg='white')
 
             if num_mines == 0:
-                self.reveal_neighbors(row, col)  # Automatisches Aufdecken der angrenzenden Felder, falls keine Minen angrenzen
+                self.reveal_neighbors(row,
+                                      col)  # Automatisches Aufdecken der angrenzenden Felder, falls keine Minen angrenzen
         if self.check_win():
             # Überprüfen, ob das Spiel gewonnen wurde
             self.timer.stop()  # Timer stoppen
@@ -217,8 +226,10 @@ class Minesweeper:
                 if button_text.isdigit():  # Falls das Feld eine Zahl zeigt
                     num_mines = int(button_text)  # Anzahl der Minen, die das Feld umgeben
                     neighbors = self.get_neighbors(r, c)  # Nachbarfelder des aktuellen Felds abfragen
-                    hidden_neighbors = [(i, j) for i, j in neighbors if self.buttons[i][j].cget('text') == ' ']  # Nachbarfelder, die noch nicht aufgedeckt wurden
-                    marked_neighbors = [(i, j) for i, j in neighbors if self.buttons[i][j].cget('text') == 'M']  # Nachbarfelder, die als Minen markiert wurden
+                    hidden_neighbors = [(i, j) for i, j in neighbors if self.buttons[i][j].cget(
+                        'text') == ' ']  # Nachbarfelder, die noch nicht aufgedeckt wurden
+                    marked_neighbors = [(i, j) for i, j in neighbors if self.buttons[i][j].cget(
+                        'text') == 'M']  # Nachbarfelder, die als Minen markiert wurden
 
                     if len(marked_neighbors) == num_mines:
                         # Wenn alle Minen in den Nachbarfeldern markiert sind, können alle
@@ -240,12 +251,12 @@ class Minesweeper:
             return None  # Kein sicherer Zug gefunden
 
     def suggest_move(self):
-        # Diese Methode schlägt einen sicheren Zug vor oder fragt den Spieler, ob er
+        # Diese Methode schlägt einen sicheren Zug vor (basierend auf seine Moves) oder fragt den Spieler, ob er
         # ein Risiko eingehen und raten möchte.
         move = self.find_safe_move()  # Sicheren Zug suchen
         if move:
             row, col = move
-            self.reveal_tile(row, col)  # Sicheres Feld aufdecken
+            self.mark(row, col)  # Sicheres Feld aufdecken
         else:
             # Wenn kein sicherer Zug gefunden wird, wird der Spieler gefragt, ob er raten möchte
             response = messagebox.askyesno("Ratezug", "Kein sicherer Zug gefunden. Soll ich raten?")
@@ -260,13 +271,12 @@ class Minesweeper:
             row, col = random.choice(hidden_tiles)  # Zufälliges verdecktes Feld wählen
             self.reveal_tile(row, col)  # Gewähltes Feld aufdecken
 
-
-
     def restart_game(self):
         # Neustart des Spiels: Zurücksetzen aller Felder und Timer
         for row in range(self.rows):
             for col in range(self.cols):
-                self.buttons[row][col].config(text=' ', bg='SystemButtonFace', state='normal')  # Zurücksetzen der Felder
+                self.buttons[row][col].config(text=' ', bg='SystemButtonFace',
+                                              state='normal')  # Zurücksetzen der Felder
         self.mines_location.clear()  # Löschen der Minenliste
         self.board.clear()  # Löschen des Spielbretts
         self.first_click = True  # Zurücksetzen des ersten Klicks
@@ -274,3 +284,8 @@ class Minesweeper:
         self.marked_label.config(text="Markierte Minen: 0")  # Zurücksetzen des Labels
         self.timer.stop()  # Timer stoppen
         self.timer.reset()  # Timer zurücksetzen
+
+    def mark(self, row, col):
+        self.buttons[row][col].config(text=' ', bg='green')
+
+
