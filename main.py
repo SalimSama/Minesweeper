@@ -1,6 +1,6 @@
 # Startet das Programm und öffnet das Menü, bekommt als Eingabe die gewünschten Spieleinstellungen
 import tkinter as tk
-from tkinter import simpledialog, messagebox
+from tkinter import messagebox
 from minesweeper import Minesweeper
 
 
@@ -39,7 +39,7 @@ def start_game(rows, cols, mines, geometry):
     game_window.title("Minesweeper")
     width, height = map(int, geometry.split('x'))
     center_window(game_window, width, height)  # Zentriert das Fenster auf dem Bildschirm
-    game = Minesweeper(game_window, rows, cols, mines)  # Initialisiert das Spiel
+    Minesweeper(game_window, rows, cols, mines)  # Initialisiert das Spiel
     try:
         menu_window.destroy()  # Schließt das Menüfenster, sobald das Spiel startet
     finally:
@@ -49,12 +49,12 @@ def start_game(rows, cols, mines, geometry):
 # Zeigt die Bestenliste an
 def show_leaderboard():
     leaderboard_window = tk.Toplevel(menu_window)  # Neues Fenster für die Bestenliste
-    leaderboard_window.title("Top Ranglisten")
+    leaderboard_window.title("Top-Listen")
     center_window(leaderboard_window, 250, 300)
     leaderboard_window.configure(bg="#1c1c1c")  # Hintergrundfarbe des Fensters
     leaderboards = Minesweeper.load_leaderboard()  # Lädt die Bestenliste aus der Datei
     for difficulty, times in leaderboards.items():
-        # Zeigt die Bestenzeiten für jede Schwierigkeitsstufe an
+        # Zeigt die Bestzeiten für jede Schwierigkeitsstufe an
         create_label(leaderboard_window,
                      text=f"{difficulty} --> Bestzeiten: {', '.join([f'{time:.2f}s' for time in times])}",
                      font=("Helvetica", 16, "bold"),

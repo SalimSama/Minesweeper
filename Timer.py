@@ -45,5 +45,5 @@ class Timer:
         hours = int(elap / 3600)
         minutes = int(elap / 60) % 60
         seconds = int(elap) % 60
-        mSeconds = int((elap - int(elap)) * 100)
-        return f'{hours:02}:{minutes:02}:{seconds:02}.{mSeconds:02}'
+        mseconds = int((elap - int(elap)) * 100)
+        return f'{hours:02}:{minutes:02}:{seconds:02}.{mseconds:02}'

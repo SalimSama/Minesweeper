@@ -259,7 +259,7 @@ class Minesweeper:
             self.mark(row, col)  # Sicheres Feld aufdecken
         else:
             # Wenn kein sicherer Zug gefunden wird, wird der Spieler gefragt, ob er raten möchte
-            response = messagebox.askyesno("Ratezug", "Kein sicherer Zug gefunden. Soll ich raten?")
+            response = messagebox.askyesno("Raten?", "Kein sicherer Zug gefunden. Soll ich raten?")
             if response:
                 self.random_guess()  # Zufälliges Feld aufdecken
 
